@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Check-in</title>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* 背景渐变 + 毛玻璃卡片 */
+        .page-bg {
+            background: radial-gradient(circle at top left, #ecfeff 0, #e0f2fe 25%, #f5f3ff 55%, #f9fafb 100%);
+        }
+
+        .card {
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(18px);
+        }
+
+        .card-soft {
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .risk-low { border-left-color: #10b981; }
+        .risk-medium { border-left-color: #f59e0b; }
+        .risk-high { border-left-color: #ef4444; }
+
+        .audio-wave, .mic-active {
+            animation: pulse-wave 1.5s infinite ease-in-out;
+        }
+        @keyframes pulse-wave {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .history-item {
+            border-bottom: 1px dashed #e5e7eb;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        /* 小胶囊标签 */
+        .pill {
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+        }
+    </style>
+</head>
+<body class="page-bg min-h-screen flex items-start justify-center px-4 sm:px-6 lg:px-10 pb-12">
+
+    <!-- 背景装饰色块 -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden">
+        <div class="absolute -top-32 -left-20 w-72 h-72 bg-emerald-100 rounded-full opacity-60 blur-3xl"></div>
+        <div class="absolute -top-10 right-0 w-80 h-80 bg-sky-100 rounded-full opacity-60 blur-3xl"></div>
+        <div class="absolute bottom-[-4rem] left-1/2 -translate-x-1/2 w-96 h-96 bg-purple-100 rounded-full opacity-50 blur-3xl"></div>
+    </div>
+
+    <div class="relative w-full max-w-5xl space-y-8 mt-10">
+
+        <!-- Header -->
+        <header class="space-y-5 text-center">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/80 border border-emerald-100 pill">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs font-medium text-emerald-600 tracking-wide">
+                    Gentle AI · Daily Emotional Check-in
+                </span>
+            </div>
+
+            <div class="space-y-3">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+                    Mental Health Check-in
+                </h1>
+                <p class="text-base sm:text-lg text-slate-500 max-w-2xl mx-auto">
+                    Take a slow breath, share how you’re feeling, and we’ll respond with warm, personalized support.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3 text-xs text-slate-500">
+                <span class="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-white/80 border border-slate-100">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+                    <span>Private & Secure</span>
+                </span>
+                <span class="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-white/80 border border-slate-100">
+                    <i data-lucide="heart-pulse" class="w-3.5 h-3.5 text-rose-500"></i>
+                    <span>Emotion-aware AI</span>
+                </span>
+                <span class="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-white/80 border border-slate-100">
+                    <i data-lucide="waves" class="w-3.5 h-3.5 text-sky-500"></i>
+                    <span>Optional Voice Input</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+
+            <!-- Left: Check-in -->
+            <div class="lg:col-span-2 card bg-white/90 border border-slate-100 rounded-2xl p-6 sm:p-7 space-y-5">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center">
+                            <i data-lucide="smile-plus" class="w-5 h-5 text-emerald-500"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-semibold text-slate-800">
+                                How are you feeling today?
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-400">
+                                You can type or hold the mic and just talk. No need to sound “perfect”.
+                            </p>
+                        </div>
+                    </div>
+                    <span id="userIdDisplay" class="hidden sm:inline-flex items-center text-[11px] font-medium text-slate-500 px-3 py-1 rounded-full bg-slate-50 border border-slate-100">
+                        <!-- filled by JS -->
+                    </span>
+                </div>
+
+                <!-- Textarea + Mic -->
+                <div class="relative">
+                    <textarea
+                        id="moodInput"
+                        rows="5"
+                        class="w-full text-sm sm:text-base px-3.5 py-3.5 pr-12 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition duration-150 placeholder:text-slate-400"
+                        placeholder="e.g., “I’ve been stressed and anxious lately. I feel tired, overwhelmed, and close to tears.”"></textarea>
+
+                    <button
+                        id="micBtn"
+                        class="absolute right-3 top-3.5 p-2 rounded-full text-slate-400 hover:text-rose-500 hover:bg-slate-100 transition duration-150 disabled:opacity-50"
+                        onclick="toggleSpeechRecognition()"
+                        type="button">
+                        <i data-lucide="mic" class="w-5 h-5"></i>
+                    </button>
+
+                    <span
+                        id="micStatus"
+                        class="absolute bottom-3 left-3 text-[11px] text-slate-400 hidden">
+                        Listening...
+                    </span>
+                </div>
+
+                <!-- Helper chips -->
+                <div class="flex flex-wrap gap-2 text-xs text-slate-500">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 cursor-pointer hover:bg-emerald-100 transition"
+                          onclick="moodInput.value = 'I feel okay on the outside, but inside I\'m really exhausted and anxious.'">
+                        “Tired but still pushing”
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-50 text-sky-700 cursor-pointer hover:bg-sky-100 transition"
+                          onclick="moodInput.value = 'Today was really heavy, and I feel like nothing is going right.'">
+                        “Heavy day”
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-50 text-purple-700 cursor-pointer hover:bg-purple-100 transition"
+                          onclick="moodInput.value = 'Actually, I feel calm and grateful today.'">
+                        “Grateful & calm”
+                    </span>
+                </div>
+
+                <!-- Bottom row: user id + button (mobile 下挪) -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                    <span
+                        class="sm:hidden inline-flex items-center text-[11px] font-medium text-slate-500 px-3 py-1 rounded-full bg-slate-50 border border-slate-100">
+                        <span id="userIdDisplay_mobile"></span>
+                    </span>
+
+                    <div class="flex-1"></div>
+
+                    <div class="w-full sm:w-auto">
+                        <button
+                            id="submitBtn"
+                            type="button"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 via-emerald-600 to-sky-500 hover:from-emerald-600 hover:to-sky-600 text-white font-semibold text-sm sm:text-base py-3 px-6 rounded-xl transition duration-150 transform hover:translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed">
+                            <svg id="loadingSpinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span id="btnText">Check In</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: History -->
+            <div class="lg:col-span-1 card-soft bg-white/90 border border-slate-100 rounded-2xl p-5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-sky-50 flex items-center justify-center">
+                            <i data-lucide="line-chart" class="w-4 h-4 text-sky-500"></i>
+                        </div>
+                        <h2 class="text-base sm:text-lg font-semibold text-slate-800">
+                            Past 7 Days
+                        </h2>
+                    </div>
+                    <span class="text-[11px] text-slate-400">
+                        Mood · Risk · Notes
+                    </span>
+                </div>
+
+                <div id="historySummary"
+                     class="text-slate-500 text-xs sm:text-sm h-52 sm:h-60 overflow-y-auto p-3 bg-slate-50/80 rounded-xl border border-dashed border-slate-200">
+                    <p class="text-center text-slate-400 py-6">Loading history...</p>
+                </div>
+            </div>
+
+            <!-- Bottom: AI Reply -->
+            <div id="responseCard"
+                 class="lg:col-span-3 card bg-white/95 border border-slate-100 border-l-4 rounded-2xl p-6 sm:p-8 space-y-6 risk-low">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center">
+                            <i data-lucide="message-circle" class="w-5 h-5 text-emerald-500"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                                Support Assistant Reply
+                                <span class="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                                    For reflection, not diagnosis
+                                </span>
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100">
+                            <span class="text-slate-400 font-medium">Emotion</span>
+                            <span id="emotionLabel" class="font-semibold text-slate-800 text-xs sm:text-sm">
+                                Neutral
+                            </span>
+                        </div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100">
+                            <span class="text-slate-400 font-medium">Risk</span>
+                            <span id="riskLevel" class="font-semibold text-slate-800 text-xs sm:text-sm">
+                                0 (Safe)
+                            </span>
+                        </div>
+
+                        <div id="audioPlayerContainer" class="hidden">
+                            <button
+                                id="audioPlayBtn"
+                                type="button"
+                                class="inline-flex items-center gap-1.5 bg-sky-500 hover:bg-sky-600 text-white font-medium text-xs sm:text-sm py-2 px-3 rounded-full transition duration-150 audio-wave">
+                                <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                <span id="audioBtnText">Listen to Reply</span>
+                            </button>
+                            <audio id="replyAudio" class="hidden"></audio>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-sm sm:text-lg leading-relaxed text-slate-700 whitespace-pre-wrap" id="textReply">
+                    Welcome 🕊️  
+                    Your personalized support message will appear here after your first check-in.
+                </div>
+
+                <div id="safetyWarning"
+                     class="hidden p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs sm:text-sm font-medium flex items-start space-x-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5"></i>
+                    <span>
+                        Safety Notice: If you are experiencing thoughts of self-harm or feel unsafe, please contact local emergency services or a trusted professional immediately.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide
+        lucide.createIcons();
+
+        // --- State & DOM ---
+        const API_ENDPOINT = "/checkin";
+        const HISTORY_ENDPOINT = "/history";
+        const USER_ID = "demo-user-1";
+
+        const moodInput = document.getElementById('moodInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        const responseCard = document.getElementById('responseCard');
+        const emotionLabel = document.getElementById('emotionLabel');
+        const riskLevelSpan = document.getElementById('riskLevel');
+        const textReplyDiv = document.getElementById('textReply');
+        const audioPlayerContainer = document.getElementById('audioPlayerContainer');
+        const replyAudio = document.getElementById('replyAudio');
+        const audioPlayBtn = document.getElementById('audioPlayBtn');
+        const audioBtnText = document.getElementById('audioBtnText');
+        const safetyWarning = document.getElementById('safetyWarning');
+        const historySummary = document.getElementById('historySummary');
+        const micBtn = document.getElementById('micBtn');
+        const micStatus = document.getElementById('micStatus');
+
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const userIdDisplayMobile = document.getElementById('userIdDisplay_mobile');
+
+        userIdDisplay.textContent = `User ID: ${USER_ID}`;
+        userIdDisplayMobile.textContent = `User ID: ${USER_ID}`;
+
+        // --- Speech Recognition ---
+        let recognition;
+        let isListening = false;
+
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.add('mic-active', 'text-rose-500');
+                micStatus.classList.remove('hidden');
+                micStatus.textContent = "Listening... tap again to stop.";
+                moodInput.placeholder = "Listening...";
+                moodInput.disabled = true;
+                submitBtn.disabled = true;
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                micBtn.classList.remove('mic-active', 'text-rose-500');
+                micStatus.classList.add('hidden');
+                moodInput.placeholder = "e.g., “I’ve been stressed and anxious lately. I feel tired, overwhelmed, and close to tears.”";
+                moodInput.disabled = false;
+                submitBtn.disabled = false;
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                moodInput.value = transcript;
+                micStatus.textContent = "Captured. You can edit before sending.";
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                micStatus.textContent = `Error: ${event.error}`;
+                recognition.stop();
+            };
+        } else {
+            micBtn.disabled = true;
+            micBtn.title = "Browser does not support Speech Recognition.";
+            micStatus.textContent = "Voice input unsupported in this browser.";
+            micStatus.classList.remove('hidden');
+        }
+
+        function toggleSpeechRecognition() {
+            if (!recognition) return;
+            if (isListening) recognition.stop();
+            else {
+                moodInput.value = '';
+                recognition.start();
+            }
+        }
+
+        // --- Helpers ---
+        function setProcessing(isProcessing) {
+            submitBtn.disabled = isProcessing;
+            if (isProcessing) {
+                btnText.textContent = "Processing...";
+                if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+                if (isListening && recognition) recognition.stop();
+            } else {
+                btnText.textContent = "Check In";
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        function displayHistory(historyData) {
+            historySummary.innerHTML = '';
+            if (!historyData || historyData.length === 0) {
+                historySummary.innerHTML = '<p class="text-center text-slate-400 py-6">No recent history found. Your first check-in can start your journey 💚</p>';
+                return;
+            }
+
+            historyData.forEach(item => {
+                let riskColor = 'text-slate-700';
+                if (item.risk_level >= 3) {
+                    riskColor = 'text-rose-600 font-semibold';
+                } else if (item.risk_level === 2 || item.risk_level === 1) {
+                    riskColor = 'text-amber-500 font-semibold';
+                } else {
+                    riskColor = 'text-emerald-600 font-semibold';
+                }
+
+                const itemHtml = `
+                    <div class="history-item">
+                        <div class="flex justify-between items-center text-[11px] sm:text-xs">
+                            <span class="font-medium text-slate-600 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full ${
+                                    item.risk_level >= 3
+                                        ? 'bg-rose-500'
+                                        : item.risk_level >= 1
+                                        ? 'bg-amber-400'
+                                        : 'bg-emerald-500'
+                                }"></span>
+                                ${item.date.split(' ')[0]}
+                            </span>
+                            <span class="${riskColor}">
+                                ${item.emotion_label} (R: ${item.risk_level})
+                            </span>
+                        </div>
+                        <p class="text-slate-500 mt-1 italic leading-tight text-[11px] sm:text-xs overflow-hidden line-clamp-2">
+                            “${item.input_text.substring(0, 70)}${item.input_text.length > 70 ? '...' : ''}”
+                        </p>
+                    </div>
+                `;
+                historySummary.innerHTML += itemHtml;
+            });
+        }
+
+        async function loadHistory() {
+            historySummary.innerHTML = '<p class="text-center text-slate-400 py-6">Loading history...</p>';
+            try {
+                const response = await fetch(`${HISTORY_ENDPOINT}?user_id=${USER_ID}`);
+                const historyData = await response.json();
+                displayHistory(historyData);
+            } catch (error) {
+                console.error("Failed to load history:", error);
+                historySummary.innerHTML = '<p class="text-center text-rose-400 py-6">Error loading history. Please check the backend.</p>';
+            }
+        }
+
+        function updateUI(data) {
+            responseCard.classList.remove('risk-low', 'risk-medium', 'risk-high');
+            safetyWarning.classList.add('hidden');
+
+            let riskText = `(Risk: ${data.risk_level})`;
+            if (data.risk_level >= 3) {
+                responseCard.classList.add('risk-high');
+                riskText = `(High Risk!)`;
+                safetyWarning.classList.remove('hidden');
+            } else if (data.risk_level === 2 || data.risk_level === 1) {
+                responseCard.classList.add('risk-medium');
+                riskText = `(Medium Risk)`;
+            } else {
+                responseCard.classList.add('risk-low');
+                riskText = `(Safe)`;
+            }
+
+            emotionLabel.textContent = data.emotion_label || 'N/A';
+            riskLevelSpan.textContent = `${data.risk_level} ${riskText}`;
+            textReplyDiv.textContent = data.text_reply || 'Could not generate a reply at this time.';
+
+            if (data.audio_url) {
+                replyAudio.src = data.audio_url;
+                audioPlayerContainer.classList.remove('hidden');
+            } else {
+                audioPlayerContainer.classList.add('hidden');
+            }
+        }
+
+        // --- Events ---
+        async function submitCheckin() {
+            const text = moodInput.value.trim();
+            if (!text) {
+                alert("Please share a bit about how you’re feeling before checking in.");
+                return;
+            }
+
+            setProcessing(true);
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: USER_ID,
+                        text: text
+                    })
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    textReplyDiv.textContent = `Error: ${data.error}`;
+                } else {
+                    updateUI(data);
+                    moodInput.value = '';
+                    await loadHistory();
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                textReplyDiv.textContent = "Connection Error: Could not reach the backend service. Please check the console and backend.";
+                emotionLabel.textContent = 'Error';
+                riskLevelSpan.textContent = '0 (Safe)';
+            } finally {
+                setProcessing(false);
+            }
+        }
+
+        submitBtn.addEventListener('click', submitCheckin);
+
+        audioPlayBtn?.addEventListener('click', () => {
+            if (replyAudio.paused) {
+                replyAudio.pause();
+                const currentSrc = replyAudio.src;
+                replyAudio.src = currentSrc;
+                replyAudio.play();
+                audioBtnText.textContent = "Playing...";
+            } else {
+                replyAudio.pause();
+                audioBtnText.textContent = "Listen to Reply";
+            }
+        });
+
+        replyAudio.addEventListener('ended', () => {
+            audioBtnText.textContent = "Listen to Reply";
+        });
+
+        window.onload = loadHistory;
+    </script>
+</body>
+</html>
